@@ -1,0 +1,47 @@
+version: "3.8"
+services:
+  mysql_srv:
+    image: mysql:8.0
+    container_name: mysql_ctr
+    stdin_open: true
+    restart: always
+    environment:
+      MYSQL_DATABASE: backend_coding_assignment
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./conf:/etc/mysql/conf.d
+      - ./logs:/logs
+
+  phpmyadmin_srv:
+    depends_on:
+      - mysql_srv
+    image: phpmyadmin/phpmyadmin
+    container_name: phpadmin_ctr
+    restart: always
+    environment:
+      PMA_HOST: mysql_srv
+    ports:
+      - 8080:80
+
+  backend_srv:
+    container_name: app
+    restart: always
+    build: .
+    depends_on:
+      - mysql_srv
+    env_file:
+      - ./api/.env
+    environment:
+      MYSQL_HOST: mysql_srv
+    ports:
+      - 8001:8001
+    volumes:
+      - ./api:/api
+
+volumes:
+  mysql_srv:
+    driver: local

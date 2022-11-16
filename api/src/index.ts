@@ -1,16 +1,18 @@
 import express, { Application, Request, Response } from "express";
-import routes from "./routes";
 import dotenv from "dotenv";
 import cors from "cors";
 import { cyan, cyanBright } from "cli-color";
-import sequelizeConnection from "./db/config";
+
+// custom imports
+import routes from "./routes";
+import sequelizeConnection from "./config";
 
 dotenv.config();
 
 // variable constants
-const PORT = process.env.PORT || 8000;
+const NODE_LOCAL_PORT = process.env.NODE_LOCAL_PORT;
 const corsOptions = {
-  origin: `http://localhost:${PORT}`,
+  origin: `http://localhost:${NODE_LOCAL_PORT}`,
 };
 
 export const get = () => {
@@ -23,7 +25,7 @@ export const get = () => {
 
   app.get("/", async (req: Request, res: Response): Promise<Response> => {
     return res.status(200).send({
-      message: `Welcome to the Backend Assignment API! Endpoints available at http://localhost:${PORT}/api/v1`,
+      message: `Welcome to the Backend Assignment API! Endpoints available at http://localhost:${NODE_LOCAL_PORT}/api/v1`,
     });
   });
 
@@ -32,7 +34,7 @@ export const get = () => {
   sequelizeConnection
     .sync()
     .then(() => {
-      console.log(cyan("Database successfully connected"));
+      console.log(cyan("Database successfully connected!"));
     })
     .catch((err) => {
       console.log("Error", err);
@@ -42,13 +44,16 @@ export const get = () => {
 };
 
 export const start = () => {
+  process.on("uncaughtException", function (err) {
+    console.log(err);
+  });
   const app = get();
   try {
     // listen for requests
-    app.listen(PORT, () => {
+    app.listen(NODE_LOCAL_PORT, () => {
       console.log(
         cyanBright(
-          `⚡️[server]: Server is running at https://localhost:${PORT}`
+          `⚡️[server]: Server is running at https://localhost:${NODE_LOCAL_PORT}`
         )
       );
     });
