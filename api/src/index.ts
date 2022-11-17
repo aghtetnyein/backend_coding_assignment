@@ -60,6 +60,8 @@ export const start = () => {
   } catch (error: any) {
     console.log(`Error occurred: ${error.message}`);
   }
+
+  return app;
 };
 
-start();
+export default start();
