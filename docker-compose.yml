@@ -30,7 +30,9 @@ services:
   backend_srv:
     container_name: app
     restart: always
-    build: .
+    build:
+      context: ./api
+      dockerfile: dockerfile
     depends_on:
       - mysql_srv
     env_file:

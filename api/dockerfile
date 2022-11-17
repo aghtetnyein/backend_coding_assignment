@@ -1,7 +1,14 @@
-FROM node:latest
+FROM node:19-alpine3.15 AS builder
 WORKDIR /api
 COPY package*.json ./
 RUN npm install
 COPY . .
+RUN npm run build
+
+FROM node:19-alpine3.15 AS server
+WORKDIR /api
+COPY package* ./
+RUN npm install --production
+COPY --from=builder ./api/dist ./dist
 EXPOSE 8001
 CMD ["npm", "start"]
