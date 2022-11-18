@@ -8,6 +8,7 @@ const db = new Sequelize(
   {
     host: dbConfig.MYSQL_HOST,
     dialect: dbConfig.dialect,
+    logging: false,
 
     pool: {
       max: dbConfig.pool.max,
@@ -19,7 +20,8 @@ const db = new Sequelize(
 );
 
 db.authenticate().then(() => {
-  console.log("Connection has been established successfully.");
+  process.env.NODE_ENV !== "test" &&
+    console.log("Connection has been established successfully.");
 });
 
 export default db;

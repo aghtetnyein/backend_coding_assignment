@@ -14,6 +14,7 @@ const NODE_LOCAL_PORT = process.env.NODE_LOCAL_PORT;
 const corsOptions = {
   origin: `http://localhost:${NODE_LOCAL_PORT}`,
 };
+const isNotTesting = process.env.NODE_ENV !== "test";
 
 export const get = () => {
   const app: Application = express();
@@ -31,14 +32,15 @@ export const get = () => {
 
   app.use("/api/v1", routes);
 
-  sequelizeConnection
-    .sync()
-    .then(() => {
-      console.log(cyan("Database successfully connected!"));
-    })
-    .catch((err) => {
-      console.log("Error", err);
-    });
+  isNotTesting &&
+    sequelizeConnection
+      .sync()
+      .then(() => {
+        console.log(cyan("Database successfully connected!"));
+      })
+      .catch((err) => {
+        // console.log("Error", err);
+      });
 
   return app;
 };
@@ -51,11 +53,12 @@ export const start = () => {
   try {
     // listen for requests
     app.listen(NODE_LOCAL_PORT, () => {
-      console.log(
-        cyanBright(
-          `⚡️[server]: Server is running at https://localhost:${NODE_LOCAL_PORT}`
-        )
-      );
+      isNotTesting &&
+        console.log(
+          cyanBright(
+            `⚡️[server]: Server is running at https://localhost:${NODE_LOCAL_PORT}`
+          )
+        );
     });
   } catch (error: any) {
     console.log(`Error occurred: ${error.message}`);
