@@ -11,43 +11,61 @@ const playerCreator = async (req: Request, res: Response) => {
       gender: req.body.gender,
       age: req.body.age ?? null,
       level: req.body.level,
+    }).catch((err: Error) => {
+      return res.status(500).json({
+        meta: {
+          status: 500,
+          success: false,
+          message: err,
+        },
+      });
     });
 
-    let resOkay = false;
     if (req.body.sports) {
       for (let sport of req.body.sports) {
         const sportRow = await Sport.findOne({ where: { name: sport.name } });
         if (sportRow) {
           player
             .addSport(sportRow, { through: { selfGranted: false } })
-            .then(() => {
-              resOkay = true;
+            .catch((err: Error) => {
+              return res.status(500).json({
+                meta: {
+                  status: 500,
+                  success: false,
+                  message: err,
+                },
+              });
             });
         } else {
           const newSport = await Sport.create({ name: sport.name });
           player
             .addSport(newSport, { through: { selfGranted: false } })
-            .then(() => {
-              resOkay = true;
+            .catch((err: Error) => {
+              return res.status(500).json({
+                meta: {
+                  status: 500,
+                  success: false,
+                  message: err,
+                },
+              });
             });
         }
       }
 
-      resOkay &&
-        res.status(201).json({
-          meta: {
-            status: 201,
-            success: true,
-            message: "Player created successfully",
-          },
-          body: {
-            email: player.email,
-            gender: player.gender,
-            age: player.age,
-            level: player.level,
-            sports: req.body.sports,
-          },
-        });
+      res.status(201).json({
+        meta: {
+          status: 201,
+          success: true,
+          message: "Player created successfully",
+        },
+        body: {
+          email: player.email,
+          gender: player.gender,
+          age: player.age,
+          level: player.level,
+          sports: req.body.sports,
+        },
+      });
     }
   } else {
     return res.status(402).json({
