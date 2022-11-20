@@ -6,6 +6,7 @@ import { cyan, cyanBright } from "cli-color";
 // custom imports
 import routes from "./routes";
 import sequelizeConnection from "./config";
+import testQueries from "./testQueries";
 
 dotenv.config();
 
@@ -34,7 +35,7 @@ export const get = () => {
 
   isNotTesting &&
     sequelizeConnection
-      .sync()
+      .sync({ force: true })
       .then(() => {
         console.log(cyan("Database successfully connected!"));
       })
@@ -63,6 +64,8 @@ export const start = () => {
   } catch (error: any) {
     console.log(`Error occurred: ${error.message}`);
   }
+
+  // testQueries.playerCreator();
 
   return app;
 };
