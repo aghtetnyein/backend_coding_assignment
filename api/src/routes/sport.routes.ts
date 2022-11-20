@@ -7,6 +7,7 @@ const Sport = Model.Sport;
 const sportRouter = Router();
 
 sportRouter.post("/", sportController.sportCreator);
-sportRouter.get("/", sportController.sportFetcher);
+sportRouter.get("/", sportController.sportsFetcherWithMultipleUsers);
+sportRouter.get("/", sportController.sportsWithNoPlayer);
 
 export default sportRouter;

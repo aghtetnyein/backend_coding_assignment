@@ -1,13 +1,19 @@
 import { Request, Response } from "express";
-import { Op } from "sequelize";
 
 import Model from "../models";
 const Sport = Model.Sport;
+const Player = Model.Player;
 const Player_Sport = Model.Player_Sport;
 
-const sportFetcher = async (req: Request, res: Response) => {
-  // fetch sports multiple players are associated with
-  Sport.findAll({
+const sportsWithNoPlayer = async (req: Request, res: Response) => {
+  // retrieves sports no player is associated with.
+  // `SELECT * FROM sports WHERE id NOT IN (SELECT sport_id FROM player_sports)`;
+};
+
+const sportsFetcherWithMultipleUsers = async (req: Request, res: Response) => {
+  // retrieves sports multiple (= more than or equal to 2) players are associated with.
+  // `SELECT * FROM sports WHERE id IN (SELECT sport_id FROM player_sports GROUP BY sport_id HAVING COUNT(sport_id) >= 2)`;
+  const sports = await Sport.findAll({
     include: [
       {
         model: Model.Player,
@@ -49,6 +55,8 @@ const sportFetcher = async (req: Request, res: Response) => {
         },
       });
     });
+
+  console.log("sports", sports);
 };
 
 const sportCreator = async (req: Request, res: Response) => {
@@ -75,4 +83,8 @@ const sportCreator = async (req: Request, res: Response) => {
     });
 };
 
-export default { sportCreator, sportFetcher };
+export default {
+  sportCreator,
+  sportsWithNoPlayer,
+  sportsFetcherWithMultipleUsers,
+};
