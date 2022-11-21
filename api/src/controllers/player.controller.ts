@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Op } from "sequelize";
 
 import Model from "../models";
 const Player = Model.Player;
@@ -79,7 +80,16 @@ const playerCreator = async (req: Request, res: Response) => {
 };
 
 const playerFetcher = async (req: Request, res: Response) => {
+  const { gender, level, age } = req.query;
+  // Raw SQL query
+  // `SELECT * FROM players WHERE gender LIKE '%' + gender + '%' AND level LIKE '%' + level + '%' AND age LIKE '%' + age + '%'`;
+
   Player.findAll({
+    where: {
+      gender: gender !== undefined ? { [Op.eq]: gender } : { [Op.like]: "%" },
+      level: level !== undefined ? { [Op.eq]: level } : { [Op.like]: "%" },
+      age: age !== undefined ? { [Op.eq]: age } : { [Op.like]: "%" },
+    },
     include: [
       {
         model: Model.Sport,

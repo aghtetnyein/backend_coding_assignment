@@ -21,6 +21,7 @@ const Player = db.define("players", {
   },
   email: {
     allowNull: false,
+    unique: true,
     type: DataTypes.STRING,
     validate: {
       notEmpty: true,

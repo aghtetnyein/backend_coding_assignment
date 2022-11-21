@@ -35,7 +35,7 @@ const sportsFetcher = async (req: Request, res: Response) => {
       {
         model: Model.Player,
         as: "players",
-        attributes: ["id", "email", "age", "level"],
+        attributes: ["id", "email", "age", "gender", "level"],
         through: {
           attributes: [],
         },
