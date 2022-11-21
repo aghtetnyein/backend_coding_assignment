@@ -1,19 +1,36 @@
 import { Request, Response } from "express";
+import { Sequelize, Op } from "sequelize";
 
 import Model from "../models";
 const Sport = Model.Sport;
-const Player = Model.Player;
-const Player_Sport = Model.Player_Sport;
 
-const sportsWithNoPlayer = async (req: Request, res: Response) => {
-  // retrieves sports no player is associated with.
-  // `SELECT * FROM sports WHERE id NOT IN (SELECT sport_id FROM player_sports)`;
-};
+const sportsFetcher = async (req: Request, res: Response) => {
+  const hasMultiPlayers = req.query.multiPlayers;
+  const hasNoPlayers = req.query.noPlayers;
 
-const sportsFetcherWithMultipleUsers = async (req: Request, res: Response) => {
-  // retrieves sports multiple (= more than or equal to 2) players are associated with.
-  // `SELECT * FROM sports WHERE id IN (SELECT sport_id FROM player_sports GROUP BY sport_id HAVING COUNT(sport_id) >= 2)`;
-  const sports = await Sport.findAll({
+  Sport.findAll({
+    where:
+      hasMultiPlayers?.toString() === "1"
+        ? {
+            // Raw SQL query
+            // `SELECT * FROM sports WHERE id IN (SELECT sport_id FROM player_sports GROUP BY sport_id HAVING COUNT(sport_id) >= 2)`;
+            id: {
+              [Op.in]: Sequelize.literal(
+                "(SELECT sport_id FROM player_sports GROUP BY sport_id HAVING COUNT(sport_id) >= 2)"
+              ),
+            },
+          }
+        : hasNoPlayers?.toString() === "1"
+        ? {
+            // Raw SQL query
+            // `SELECT * FROM sports WHERE id NOT IN (SELECT sport_id FROM player_sports)`;
+            id: {
+              [Op.notIn]: Sequelize.literal(
+                "(SELECT sport_id FROM player_sports)"
+              ),
+            },
+          }
+        : {},
     include: [
       {
         model: Model.Player,
@@ -55,22 +72,33 @@ const sportsFetcherWithMultipleUsers = async (req: Request, res: Response) => {
         },
       });
     });
-
-  console.log("sports", sports);
 };
 
 const sportCreator = async (req: Request, res: Response) => {
   const { name } = req.body;
-  Sport.create({ name })
-    .then((sport) => {
-      return res.status(201).json({
-        meta: {
-          status: 201,
-          success: true,
-          message: "Sport created successfully",
-        },
-        body: sport,
-      });
+  Sport.findOrCreate({
+    where: { name },
+    defaults: { name },
+  })
+    .then(([sport, created]) => {
+      if (created) {
+        return res.status(201).json({
+          meta: {
+            status: 201,
+            success: true,
+            message: "Sport created successfully",
+          },
+          body: sport,
+        });
+      } else {
+        return res.status(409).json({
+          meta: {
+            status: 409,
+            success: false,
+            message: "Sport already exists",
+          },
+        });
+      }
     })
     .catch((err: Error) => {
       return res.status(500).json({
@@ -85,6 +113,5 @@ const sportCreator = async (req: Request, res: Response) => {
 
 export default {
   sportCreator,
-  sportsWithNoPlayer,
-  sportsFetcherWithMultipleUsers,
+  sportsFetcher,
 };

@@ -6,16 +6,17 @@ import { cyan, cyanBright } from "cli-color";
 // custom imports
 import routes from "./routes";
 import sequelizeConnection from "./config";
-import testQueries from "./testQueries";
 
 dotenv.config();
 
 // variable constants
-const NODE_LOCAL_PORT = process.env.NODE_LOCAL_PORT;
+const isNotTesting = process.env.NODE_ENV !== "test";
+const NODE_LOCAL_PORT = isNotTesting
+  ? process.env.NODE_LOCAL_PORT
+  : process.env.NODE_LOCAL_TEST_PORT;
 const corsOptions = {
   origin: `http://localhost:${NODE_LOCAL_PORT}`,
 };
-const isNotTesting = process.env.NODE_ENV !== "test";
 
 export const get = () => {
   const app: Application = express();
@@ -64,8 +65,6 @@ export const start = () => {
   } catch (error: any) {
     console.log(`Error occurred: ${error.message}`);
   }
-
-  // testQueries.playerCreator();
 
   return app;
 };
