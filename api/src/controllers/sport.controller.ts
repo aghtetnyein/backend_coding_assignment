@@ -74,11 +74,63 @@ const sportsFetcher = async (req: Request, res: Response) => {
     });
 };
 
+const specificSportFetcher = async (req: Request, res: Response) => {
+  const { name } = req.params;
+
+  Sport.findOne({
+    where: {
+      name: name.toLowerCase(),
+    },
+    include: [
+      {
+        model: Model.Player,
+        as: "players",
+        attributes: ["id", "email", "age", "gender", "level"],
+        through: {
+          attributes: [],
+        },
+      },
+    ],
+  })
+
+    .then((sport) => {
+      if (sport) {
+        return res.status(200).json({
+          meta: {
+            status: 200,
+            success: true,
+            message: "Sport fetched successfully",
+          },
+          body: sport,
+        });
+      } else {
+        return res.status(404).json({
+          meta: {
+            status: 404,
+            success: true,
+            message: "Sport is empty",
+          },
+          body: sport,
+        });
+      }
+    })
+    .catch((err: Error) => {
+      return res.status(500).json({
+        meta: {
+          status: 500,
+          success: false,
+          message: err,
+        },
+      });
+    });
+};
+
 const sportCreator = async (req: Request, res: Response) => {
   const { name } = req.body;
+
   Sport.findOrCreate({
-    where: { name },
-    defaults: { name },
+    where: { name: name.toLowerCase() },
+    defaults: { name: name.toLowerCase() },
   })
     .then(([sport, created]) => {
       if (created) {
@@ -114,4 +166,5 @@ const sportCreator = async (req: Request, res: Response) => {
 export default {
   sportCreator,
   sportsFetcher,
+  specificSportFetcher,
 };

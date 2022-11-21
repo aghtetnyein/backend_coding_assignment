@@ -24,7 +24,10 @@ const playerCreator = async (req: Request, res: Response) => {
 
     if (req.body.sports) {
       for (let sport of req.body.sports) {
-        const sportRow = await Sport.findOne({ where: { name: sport.name } });
+        const sportRow = await Sport.findOne({
+          where: { name: sport.name.toLowerCase() },
+        });
+
         if (sportRow) {
           player
             .addSport(sportRow, { through: { selfGranted: false } })
@@ -38,7 +41,9 @@ const playerCreator = async (req: Request, res: Response) => {
               });
             });
         } else {
-          const newSport = await Sport.create({ name: sport.name });
+          const newSport = await Sport.create({
+            name: sport.name.toLowerCase(),
+          });
           player
             .addSport(newSport, { through: { selfGranted: false } })
             .catch((err: Error) => {
