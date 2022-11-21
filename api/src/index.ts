@@ -10,11 +10,13 @@ import sequelizeConnection from "./config";
 dotenv.config();
 
 // variable constants
-const NODE_LOCAL_PORT = process.env.NODE_LOCAL_PORT;
+const isNotTesting = process.env.NODE_ENV !== "test";
+const NODE_LOCAL_PORT = isNotTesting
+  ? process.env.NODE_LOCAL_PORT
+  : process.env.NODE_LOCAL_TEST_PORT;
 const corsOptions = {
   origin: `http://localhost:${NODE_LOCAL_PORT}`,
 };
-const isNotTesting = process.env.NODE_ENV !== "test";
 
 export const get = () => {
   const app: Application = express();
@@ -34,7 +36,7 @@ export const get = () => {
 
   isNotTesting &&
     sequelizeConnection
-      .sync()
+      .sync({ force: true })
       .then(() => {
         console.log(cyan("Database successfully connected!"));
       })

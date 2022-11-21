@@ -1,21 +1,21 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../config";
-interface RoleAttributes {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-export class TodoInstance extends Model<RoleAttributes> {}
 
-const Role = db.define("roles", {
+export interface SportAttributes {
+  id: string;
+  name: string;
+}
+
+const Sport = db.define("sports", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true,
   },
   name: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
 });
 
-export default Role;
+export default Sport;
